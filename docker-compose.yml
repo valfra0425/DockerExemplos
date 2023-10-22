@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+  front:
+    image: valfranc/web-nlw-esports:latest
+    container_name: web-nlw-esports
+    ports:
+      - 8081:5173
+    networks: 
+      adgame_network:
+        ipv4_address: 172.16.0.10  # Defina o endereço IP fixo desejado
+    environment:
+      - VITE_API_URL=http://host.docker.internal:8082
+    depends_on: 
+      - back
+    command: >
+      /bin/sh -c "
+      git pull && 
+      npm i && 
+      npm run dev -- --host"
+  bd:
+    image: postgres:latest
+    container_name: banco_postgres
+    ports:
+      - 5454:5432
+    environment:
+      POSTGRES_PASSWORD: docker_eh_lindo
+    networks:
+      adgame_network:
+        ipv4_address: 172.16.0.11  # Defina o endereço IP fixo desejado
+    volumes:
+      - ./postgres-esports:/var/lib/postgres
+  back:
+    image: valfranc/server-nlw-esports:latest
+    container_name: server-nlw-esports
+    ports:
+      - 8082:3333
+    environment:
+      - DATABASE_URL=postgresql://postgres:docker_eh_lindo@bd:5432/esports
+    depends_on: 
+      - bd
+    networks:
+      adgame_network:
+        ipv4_address: 172.16.0.12  # Defina o endereço IP fixo desejado
+    command: >
+      /bin/sh -c "
+      git pull && 
+      npm i && 
+      npx prisma migrate dev && 
+      npx prisma db seed && 
+      npm run dev "
+networks:
+  adgame_network:
+    ipam:
+      config:
+        - subnet: 172.16.0.0/16
