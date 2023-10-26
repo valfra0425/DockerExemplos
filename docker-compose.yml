@@ -9,7 +9,7 @@ services:
       adgame_network:
         ipv4_address: 172.16.0.10  # Defina o endereço IP fixo desejado
     environment:
-      - VITE_API_URL=http://host.docker.internal:8082
+      - VITE_API_URL=http://10.48.9.70:8082 #mudar o ip de acordo com o da maquina
     depends_on: 
       - back
     command: >
